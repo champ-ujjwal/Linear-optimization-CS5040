@@ -1,17 +1,5 @@
-'''
-Group Members
-    Ujjwal Kumar (CS23BTNSK11002)
-    Anvitha (CS23BTNSK11001)
-    Ritvik Sai C (CS21BTECH11054)
-    Nishanth Bhoomi (CS21BTECH11040)
-  
-'''
-
-
-from ctypes import _NamedFuncPointer
 import numpy as np
-import csv
-
+import pandas as pd
 threshold_value = pow(10, -8)
 
 class SimplexAlgorithm:
@@ -146,10 +134,10 @@ class SimplexAlgorithm:
 
 
     # Read input from CSV file
-with open('input3.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        data = list(reader)
-
+data=pd.read_csv("assignment-4\input4.csv",header=None)
+data=data.fillna('')
+data = data.astype(str)
+data= data.values.tolist()
     # Extract data from CSV
 c = np.array([float(val) for val in data[0][:-1]])
 b = np.array([float(row[-1]) if row[-1] != '' else 0.0 for row in data[1:]])
@@ -157,3 +145,4 @@ A = np.array([[float(val) if val != '' else 0.0 for val in row[:-1]] for row in 
 
 
 SimplexAlgorithm(A, b, c)
+
