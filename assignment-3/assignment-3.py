@@ -2,8 +2,7 @@
 Group Members
     Ujjwal Kumar (CS23BTNSK11002)
     Anvitha (CS23BTNSK11001)
-    Member3 (Roll)
-    Member4 (Roll)
+
   
 
 '''
@@ -15,7 +14,7 @@ import numpy as np
 EPS = 1e-6
 
 
-def is_solution_degenerate(P1, P2, P3):
+def is_degenerate(P1, P2, P3):
     # Get any feasible point for the given configuration
     X = get_feasible_point(P1, P2, P3)
 
@@ -46,7 +45,7 @@ def make_non_degenerate(P1, P2, P3):
                 0.1, 10, size=rows_to_be_modified)
 
         # If degeneracy is removed, Exit
-        if not is_solution_degenerate(P1, temp_B, P3):
+        if not is_degenerate(P1, temp_B, P3):
             print('Degeneracy removed')
             break
     return P1, temp_B, P3
@@ -173,7 +172,7 @@ def main():
     # Change Input to non degenerate
     P1, P2, P3 = make_non_degenerate(P1, P2, P3)
 
-    print('Initial Feasible Point : ', z)
+    print('Initial Feasible Point: ', z)
     print('Initial Objective Value : ', np.dot(P3, z))
     print("\n")
     # Find the initial feasible point
