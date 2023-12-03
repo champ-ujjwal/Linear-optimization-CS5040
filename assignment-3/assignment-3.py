@@ -2,24 +2,25 @@
 Group Members
     Ujjwal Kumar (CS23BTNSK11002)
     Anvitha (CS23BTNSK11001)
-
-  
+    Ritvik Sai C (CS21BTECH11054)
+    Nishanth Bhoomi (CS21BTECH11040)
 
 '''
 
 
 
 import numpy as np
+import csv
 
-EPS = 1e-6
+MVAL = 1e-6
 
 
-def is_degenerate(P1, P2, P3):
+def is_solution_degenerate(P1, P2, P3):
     # Get any feasible point for the given configuration
     X = get_feasible_point(P1, P2, P3)
 
     # Find number of rows satisfied by X with equality
-    equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < EPS)[0]
+    equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < MVAL)[0]
 
     # If number of rows is not equal to number of variables
     # It is degenerate(no unique solution)
@@ -38,15 +39,15 @@ def make_non_degenerate(P1, P2, P3):
 
             temp_B = P2
             temp_B[:rows_to_be_modified] += np.random.uniform(
-                EPS, EPS*10, size=rows_to_be_modified)
+                MVAL, MVAL*10, size=rows_to_be_modified)
         else:
             temp_B = P2
             temp_B[:rows_to_be_modified] += np.random.uniform(
                 0.1, 10, size=rows_to_be_modified)
 
         # If degeneracy is removed, Exit
-        if not is_degenerate(P1, temp_B, P3):
-            print('Degeneracy removed')
+        if not is_solution_degenerate(P1, temp_B, P3):
+            print('Degeneracy has been  removed')
             break
     return P1, temp_B, P3
 
@@ -100,7 +101,7 @@ def get_neighbour(P1, P2, P3, X):
 
         # Find P1'' = Matrix of rows other than satisfied by X with equality
         # P2'' = Corresponding P2 values of above rows
-        equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < EPS)[0]
+        equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < MVAL)[0]
         not_equality_indices = ~np.isin(np.arange(len(P1)), equality_indices)
         not_equal_A = P1[not_equality_indices]
         not_equal_B = P2[not_equality_indices]
@@ -118,7 +119,7 @@ def get_neighbour(P1, P2, P3, X):
 
 
 def get_direction(P1, P2, P3, X):
-    equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < EPS)[0]
+    equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < MVAL)[0]
     A_bar = P1[equality_indices]
 
     # Find Z = Matrix having direction vectors as columns
@@ -151,25 +152,25 @@ def read_csv(file_path):
     data = [list(map(float, line.strip().split(','))) for line in lines]
     
     z = np.array(data[0][:-1])
-    c = np.array(data[1][:-1])
+    C = np.array(data[1][:-1])
     P1 = np.array([row[:-1] for row in data[2:]])
-    b = np.array([row[-1] for row in data[2:]])
+    B = np.array([row[-1] for row in data[2:]])
 
-    return c, P1, b,z
+    return C, P1, B,z
 
 
 
 def main():
     # Take input with tab spaces
-    file_path = "assignment-3\input3.csv"  # Replace with your input file path
-    c, P1, b, z = read_csv(file_path)
-    print("c: ", c)
+    file_path = "assignment-3\input3.csv"  
+    C, P1, B, z = read_csv(file_path)
+    print("C: ", C)
     print("P1: ", P1)
-    print("b: ", b)
+    print("B: ", B)
     print("z: ", z)
 
-    P1,P2,P3 = P1,b,c
-    # Change Input to non degenerate
+    P1,P2,P3 = P1,B,C
+   
     P1, P2, P3 = make_non_degenerate(P1, P2, P3)
 
     print('Initial Feasible Point: ', z)
