@@ -1,7 +1,7 @@
 Assumption
 1. Polytope is non-degenerate.
 2. Polytope is bounded
-3. Rak of A is n 
+3. Rank of A is n 
 
 Implement the simplex algorithm to maximize the objective function, You need to implement the method discussed in class. 
 
