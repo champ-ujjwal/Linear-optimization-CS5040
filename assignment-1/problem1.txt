@@ -12,3 +12,4 @@ Input: CSV file with m+2 rows and n+1 column.
              Rows third to m+2 and column one to n is the matrix A of size m*n
 
 Output: You need to print the seq
+
