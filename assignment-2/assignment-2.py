@@ -1,21 +1,20 @@
 '''
 Group Members
     Ujjwal Kumar (CS23BTNSK11002)
-    
-Note:
-Please name the input file as 'input2.csv' and place it in the same folder as this python code.
-Then run the file to get sequence of vertices visited and the value of the objective function at that vertex.
+    Anvitha (CS23BTNSK11001)
+    Member3 (Roll)
+    Member4 (Roll)
+  
 
 '''
 
-from ctypes import _NamedFuncPointer
 import numpy as np
 import csv
 
 threshold_value = pow(10, -8)
 
 class SimplexAlgorithm:
-    def _init_(self, A, b, c, z):
+    def __init__(self, A, b, c, z):
         self.A = A
         self.b = b
         self.c = c
@@ -90,7 +89,7 @@ class SimplexAlgorithm:
 
 def main():
     # Read input from CSV file
-    with open('input2.csv', newline='') as csvfile:
+    with open('assignment-2\input2.csv', newline='') as csvfile:
         reader = csv.reader(csvfile)
         data = list(reader)
 
@@ -103,5 +102,5 @@ def main():
     # Call the constructor and run the functions
     SimplexAlgorithm(A, b, c, z)
 
-if _NamedFuncPointer == '_main_':
+if __name__ == '_main_':
     main()

@@ -2,7 +2,9 @@
 Group Members
     Ujjwal Kumar (CS23BTNSK11002)
     Anvitha (CS23BTNSK11001)
-    
+    Member3 (Roll)
+    Member4 (Roll)
+  
 '''
 
 import numpy as np
@@ -24,11 +26,11 @@ class Simpex_Algorithm:
         self.visited_vertices = []
 
         result = self.main_simplex()
-        print(f"Optimal solution is {result}")
-        print(f"The Maximum Objective Value is {np.dot(self.y, result)}")
+        print(f"Optimal solution : {result}")
+        print(f"The Maximum Objective Value : {np.dot(self.y, result)}")
 
 
-        print("\nSequence of Visited Vertices:")
+        print("\nThe Sequence of Visited Vertices :")
         for vertex in self.visited_vertices:
             print(f"Vertex: {vertex}, Objective Value: {np.dot(self.y, vertex)}")
 

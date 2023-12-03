@@ -1,11 +1,10 @@
 '''
 Group Members
     Ujjwal Kumar (CS23BTNSK11002)
-    
-Note:
-Please name the input file as 'input4.csv' and place it in the same folder as this python code.
-Then run the file to get sequence of vertices visited and the value of the objective function at that vertex.
-
+    Anvitha (CS23BTNSK11001)
+    Member3 (Roll)
+    Member4 (Roll)
+  
 '''
 
 
