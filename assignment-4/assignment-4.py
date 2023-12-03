@@ -15,7 +15,7 @@ import csv
 threshold_value = pow(10, -8)
 
 class SimplexAlgorithm:
-    def _init_(self, A, b, c):
+    def __init__(self, A, b, c):
         self.A = A
         self.b = b
         self.c = c
@@ -144,20 +144,16 @@ class SimplexAlgorithm:
         return self.z
 
 
-def main():
+
     # Read input from CSV file
-    with open('input3.csv', newline='') as csvfile:
+with open('input3.csv', newline='') as csvfile:
         reader = csv.reader(csvfile)
         data = list(reader)
 
     # Extract data from CSV
-    c = np.array([float(val) for val in data[0][:-1]])
-    b = np.array([float(row[-1]) if row[-1] != '' else 0.0 for row in data[1:]])
-    A = np.array([[float(val) if val != '' else 0.0 for val in row[:-1]] for row in data[1:]])
+c = np.array([float(val) for val in data[0][:-1]])
+b = np.array([float(row[-1]) if row[-1] != '' else 0.0 for row in data[1:]])
+A = np.array([[float(val) if val != '' else 0.0 for val in row[:-1]] for row in data[1:]])
 
 
-    SimplexAlgorithm(A, b, c)
-
-
-if _NamedFuncPointer == '_main_': 
-    main()
+SimplexAlgorithm(A, b, c)
