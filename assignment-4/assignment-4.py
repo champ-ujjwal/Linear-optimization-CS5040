@@ -1,4 +1,13 @@
+'''
+Group Members
+    Ujjwal Kumar (CS23BTNSK11002)
+    Anvitha (CS23BTNSK11001)
+    Ritvik Sai C (CS21BTECH11054)
+    Nishanth Bhoomi (CS21BTECH11040)
+  
+'''
 import numpy as np
+import csv
 import pandas as pd
 threshold_value = pow(10, -8)
 
@@ -13,18 +22,21 @@ class SimplexAlgorithm:
         self.b = self.remove_degeneracy()
 
         self.visited_vertices = []
+        self.cost_values = []  
 
         self.initial_feasible_point = None
         self.z = self.feasible_point()
 
         result = self.main_simplex()
-        print(f"Optimal solution is {result}")
-        print(f"The Maximum Objective Value is {np.dot(self.c, result)}")
+        optimal_solution = np.round(result, 1)
+        optimal_solution_str = "[" + " , ".join(map(str, optimal_solution)) + "]"
+        print(f"Optimal solution is {optimal_solution_str}")
+        print(f"The Maximum Objective Value is {round(np.dot(self.c, result), 1)}")
 
         print("\nSequence of Visited Vertices:")
-        for vertex in self.visited_vertices:
-            print(f"Vertex: {vertex}, Objective Value: {np.dot(self.c, vertex)}")
-
+        for i, (vertex, cost) in enumerate(zip(self.visited_vertices, self.cost_values)):
+            vertex_str = "[" + " , ".join(map(str, np.round(vertex, 1))) + "]"
+            print(f"Vertex{i + 1}: Vertex: {vertex_str} , Objective Value: {round(cost, 1)}")
 
     def initialize_random_val(self, a):
         if a == threshold_value:
@@ -72,6 +84,12 @@ class SimplexAlgorithm:
                 X[:self.row_mod] = X[:self.row_mod] + self.rand_val
 
             Y = self.feasible_point()
+
+            # Handle the error for finding no feasible points
+            if Y is None:
+                print("Feasible point not found.")
+                exit()
+    
             e_ind = np.where(np.abs(np.dot(self.A, Y) - X) < threshold_value)[0]
             if len(e_ind) == self.n:
                 print("Non degenerate..")
@@ -89,8 +107,14 @@ class SimplexAlgorithm:
         d = np.dot(self.n_A, self.u)
         n = n[np.where(d > 0)[0]]
         d = d[np.where(d > 0)[0]]
+
+        if len(n) == 0 or len(d) == 0:
+            print("Error: Empty array")
+            exit()
+
         s = n / d
         self.alpha = np.min(s[s >= 0])
+
 
     def find_feasible_neighbour(self):
         self.calculate_direction()
@@ -120,29 +144,30 @@ class SimplexAlgorithm:
 
     def main_simplex(self):
         if np.all(np.dot(self.A, self.z) - self.b <= threshold_value):
-            self.visited_vertices.append(self.z.copy())
-            
-        print(f"Initial Feasible Point is {self.initial_feasible_point}")
+            self.visited_vertices.append(np.round(self.z.copy(), 1))
+            self.cost_values.append(round(np.dot(self.c, self.z), 1))  
+
+        print(f"Initial Feasible Point is {[val for val in np.round(self.initial_feasible_point, 1)]}")
         while True:
             result = self.find_feasible_neighbour()
             if result is None:
                 break
             else:
                 self.z = result
+                self.visited_vertices.append(np.round(self.z.copy(), 1))
+                self.cost_values.append(round(np.dot(self.c, self.z), 1))                 
         return self.z
 
 
-
-    # Read input from CSV file
-data=pd.read_csv("assignment-4\input4.csv",header=None)
+# Read input from CSV file
+data=pd.read_csv("input4.csv",header=None)
 data=data.fillna('')
 data = data.astype(str)
 data= data.values.tolist()
-    # Extract data from CSV
+
+# Extract data from CSV
 c = np.array([float(val) for val in data[0][:-1]])
 b = np.array([float(row[-1]) if row[-1] != '' else 0.0 for row in data[1:]])
 A = np.array([[float(val) if val != '' else 0.0 for val in row[:-1]] for row in data[1:]])
 
-
 SimplexAlgorithm(A, b, c)
-
