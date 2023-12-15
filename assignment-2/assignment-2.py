@@ -87,20 +87,19 @@ class SimplexAlgorithm:
                 self.visited_vertices.append(result)
         return self.z
 
-def main():
+
     # Read input from CSV file
-    with open('assignment-2\input2.csv', newline='') as csvfile:
+with open('assignment-2\input2.csv', newline='') as csvfile:
         reader = csv.reader(csvfile)
         data = list(reader)
 
     # Extract data from CSV
-    z = np.array([float(val) for val in data[0][:-1]])
-    c = np.array([float(val) for val in data[1][:-1]])
-    b = np.array([float(row[-1]) for row in data[2:]])
-    A = np.array([[float(val) for val in row[:-1]] for row in data[2:]])
+z = np.array([float(val) for val in data[0][:-1]])
+c = np.array([float(val) for val in data[1][:-1]])
+b = np.array([float(row[-1]) for row in data[2:]])
+A = np.array([[float(val) for val in row[:-1]] for row in data[2:]])
 
     # Call the constructor and run the functions
-    SimplexAlgorithm(A, b, c, z)
+SimplexAlgorithm(A, b, c, z)
 
-if __name__ == '_main_':
-    main()
+
