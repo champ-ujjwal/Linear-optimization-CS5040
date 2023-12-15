@@ -5,12 +5,11 @@ Group Members
     Ritvik Sai C (CS21BTECH11054)
     Nishanth Bhoomi (CS21BTECH11040)
   
-
 '''
 
 import numpy as np
 import csv
-
+import pandas as pd
 threshold_value = pow(10, -8)
 
 class SimplexAlgorithm:
@@ -24,14 +23,18 @@ class SimplexAlgorithm:
         self.n = size[1]
 
         self.visited_vertices = []
+        self.cost_values = []  
 
         result = self.main_simplex()
-        print(f"Optimal solution: {result}")
-        print(f"Maximum Objective Value: {np.dot(self.c, result)}")
+        optimal_solution = np.round(result, 1)
+        optimal_solution_str = "[" + " , ".join(map(str, optimal_solution)) + "]"
+        print(f"\nOptimal solution is {optimal_solution_str}")
+        print(f"The Maximum Objective Value is {round(np.dot(self.c, result), 1)}")
 
         print("\nSequence of Visited Vertices:")
-        for vertex in self.visited_vertices:
-            print(f"Vertex: {vertex}, Objective Value: {np.dot(self.c, vertex)}")
+        for i, (vertex, cost) in enumerate(zip(self.visited_vertices, self.cost_values)):
+            vertex_str = "[" + " , ".join(map(str, np.round(vertex, 1))) + "]"
+            print(f"Vertex{i + 1}: Vertex: {vertex_str} , Objective Value: {round(cost, 1)}")
 
     def calculate_direction(self):
         x = np.dot(self.A, self.z) - self.b
@@ -44,6 +47,11 @@ class SimplexAlgorithm:
         d = np.dot(self.n_A, self.u)
         n = n[np.where(d > 0)[0]]
         d = d[np.where(d > 0)[0]]
+       
+        if len(n) == 0 or len(d) == 0:
+            print("Error: Empty array")
+            exit()
+
         s = n / d
         self.alpha = np.min(s[s >= 0])
 
@@ -57,7 +65,7 @@ class SimplexAlgorithm:
         else:
             self.u = self.direction_vector[positive_cost_indices[0]]
 
-            # Check for unbounded LP based on the u vector
+            # Check for unbounded LP 
             if np.all(np.dot(self.A, self.u) <= 0):
                 print("Unbounded LP")
                 exit()
@@ -76,7 +84,8 @@ class SimplexAlgorithm:
 
     def main_simplex(self):
         if np.all(np.dot(self.A, self.z) - self.b <= threshold_value):
-            self.visited_vertices.append(self.z.copy())
+            self.visited_vertices.append(np.round(self.z.copy(), 1))
+            self.cost_values.append(round(np.dot(self.c, self.z), 1))
 
         while True:
             result = self.find_feasible_neighbour()
@@ -84,22 +93,18 @@ class SimplexAlgorithm:
                 break
             else:
                 self.z = result.copy()
-                self.visited_vertices.append(result)
+                self.visited_vertices.append(np.round(self.z.copy(), 1))
+                self.cost_values.append(round(np.dot(self.c, self.z), 1))
         return self.z
 
+data=pd.read_csv("input2.csv",header=None)
+data=data.fillna('')
+data = data.astype(str)
+data= data.values.tolist()
 
-    # Read input from CSV file
-with open('assignment-2\input2.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        data = list(reader)
+z = np.array([float(val) if val != '' else np.nan for val in data[0][:-1]])
+c = np.array([float(val) if val != '' else np.nan for val in data[1][:-1]])
+b = np.array([float(row[-1]) if row[-1] != '' else np.nan for row in data[2:]])
+A = np.array([[float(val) if val != '' else np.nan for val in row[:-1]] for row in data[2:]])
 
-    # Extract data from CSV
-z = np.array([float(val) for val in data[0][:-1]])
-c = np.array([float(val) for val in data[1][:-1]])
-b = np.array([float(row[-1]) for row in data[2:]])
-A = np.array([[float(val) for val in row[:-1]] for row in data[2:]])
-
-    # Call the constructor and run the functions
 SimplexAlgorithm(A, b, c, z)
-
-

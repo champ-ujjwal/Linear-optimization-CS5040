@@ -4,72 +4,51 @@ Group Members
     Anvitha (CS23BTNSK11001)
     Ritvik Sai C (CS21BTECH11054)
     Nishanth Bhoomi (CS21BTECH11040)
-
+  
 '''
-
-
-
 import numpy as np
-import csv
+import pandas as pd
 
 MVAL = 1e-6
 
-
 def is_solution_degenerate(P1, P2, P3):
-    # Get any feasible point for the given configuration
     X = get_feasible_point(P1, P2, P3)
-
-    # Find number of rows satisfied by X with equality
-    equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < MVAL)[0]
-
-    # If number of rows is not equal to number of variables
-    # It is degenerate(no unique solution)
-    if len(equality_indices) == P1.shape[1]:
+    equ_ind = np.where(np.abs(np.dot(P1, X) - P2) < MVAL)[0]
+    if len(equ_ind) == P1.shape[1]:
         return False
     return True
 
-
 def make_non_degenerate(P1, P2, P3):
-    rows_to_be_modified = P1.shape[0]-P1.shape[1]
-
+    rows_to_be_modified = P1.shape[0] - P1.shape[1]
     num_iter = 0
     while True:
-        if(num_iter < 1000):
+        if num_iter < 1000:
             num_iter += 1
-
-            temp_B = P2
-            temp_B[:rows_to_be_modified] += np.random.uniform(
-                MVAL, MVAL*10, size=rows_to_be_modified)
+            temp_B = P2.copy()
+            temp_B[:rows_to_be_modified] += np.random.uniform(MVAL, MVAL * 10, size=rows_to_be_modified)
         else:
-            temp_B = P2
-            temp_B[:rows_to_be_modified] += np.random.uniform(
-                0.1, 10, size=rows_to_be_modified)
+            temp_B = P2.copy()
+            temp_B[:rows_to_be_modified] += np.random.uniform(0.1, 10, size=rows_to_be_modified)
 
-        # If degeneracy is removed, Exit
         if not is_solution_degenerate(P1, temp_B, P3):
-            print('Degeneracy has been  removed')
+            print('Degeneracy has been removed\n')
             break
     return P1, temp_B, P3
 
-
 def get_feasible_point(P1, P2, P3):
-
     if np.all((P2 >= 0)):
         return np.zeros(P3.shape)
     else:
         for _ in range(50):
-            # consider any random n of m constraints
             m = P1.shape[0]
             n = P1.shape[1]
-            random_indices = np.random.choice(m, n)
-            random_A = P1[random_indices]
-            random_B = P2[random_indices]
+            random_ind = np.random.choice(m, n)
+            random_A = P1[random_ind]
+            random_B = P2[random_ind]
             try:
-                # Find Equality Solution for this n constraints
                 possible_X = np.dot(np.linalg.inv(random_A), random_B)
 
-                # If the calculated X is satisfying all of the constraint
-                if (np.all((np.dot(P1, possible_X) - P2 <= 0))):
+                if np.all((np.dot(P1, possible_X) - P2 <= 0)):
                     return possible_X
                 else:
                     continue
@@ -77,113 +56,93 @@ def get_feasible_point(P1, P2, P3):
             except:
                 pass
 
-
 def get_neighbour(P1, P2, P3, X):
-    # Get direction vectors of vertex X
     Z = get_direction(P1, P2, P3, X)
-
-    # Find costs through these directions
     costs = np.dot(Z, P3)
 
-    # Find Directions with positive costs
     positive_cost_directions = np.where(costs > 0)[0]
 
     if len(positive_cost_directions) == 0:
         return None
     else:
-        # Consider positive cost direction vector
         v = Z[positive_cost_directions[0]]
 
         # If there is no bound in the present direction
         if len(np.where(np.dot(P1, v) > 0)[0]) == 0:
-            print('Given LP is Unbounded')
+            print('Given LP is Unbounded\n')
             exit()
 
-        # Find P1'' = Matrix of rows other than satisfied by X with equality
-        # P2'' = Corresponding P2 values of above rows
-        equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < MVAL)[0]
-        not_equality_indices = ~np.isin(np.arange(len(P1)), equality_indices)
-        not_equal_A = P1[not_equality_indices]
-        not_equal_B = P2[not_equality_indices]
+        equ_ind = np.where(np.abs(np.dot(P1, X) - P2) < MVAL)[0]
+        not_equ_ind = ~np.isin(np.arange(len(P1)), equ_ind)
+        not_equal_A = P1[not_equ_ind]
+        not_equal_B = P2[not_equ_ind]
 
-        # Find maximum t in feasible neighbour(X + tv)
         n = not_equal_B - np.dot(not_equal_A, X)
         d = np.dot(not_equal_A, v)
         n = n[np.where(d > 0)[0]]
         d = d[np.where(d > 0)[0]]
-        s = n/d
+        s = n / d
         t = np.min(s[s >= 0])
 
-        # Return the maximum feasible neighbour of X
-        return X + t*v
-
+        return X + t * v
 
 def get_direction(P1, P2, P3, X):
-    equality_indices = np.where(np.abs(np.dot(P1, X)-P2) < MVAL)[0]
-    A_bar = P1[equality_indices]
+    equ_ind = np.where(np.abs(np.dot(P1, X) - P2) < MVAL)[0]
+    A_bar = P1[equ_ind]
 
-    # Find Z = Matrix having direction vectors as columns
     Z = -np.linalg.inv(np.transpose(A_bar))
-
     return Z
 
 
-def SimplexAlgorithm(P1, P2, P3, X):
+def SimplexAlgorithm(P1, P2, P3, X, visited_vertices, cost_values):
     while True:
-        # Find neighbour with greater cost
+        # Check if the current vertex is already visited
+        if any(np.all(np.isclose(X, v, atol=MVAL)) for v in visited_vertices):
+            print('Cycle detected. Exiting.\n')
+            break
+
+        visited_vertices.append(np.round(X.copy(), 1))
+        cost_values.append(round(np.dot(P3, X), 1))
+
         V = get_neighbour(P1, P2, P3, X)
 
-        # If the neighbour isn't available
-        # the present vertex is the optimal
-        # else move to neighbour
         if V is None:
             break
         else:
-            print('Current Vertex: ', np.round(V))
-            print(np.dot(P3, V))
             X = V
     return X
 
-print("\nThe Simplex Algorithm for non-degenerate bounded polytope.\n")
-def read_csv(file_path):
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+print("\nThe Simplex Algorithm for non-degenerate bounded polytope.")
 
-    data = [list(map(float, line.strip().split(','))) for line in lines]
-    
-    z = np.array(data[0][:-1])
-    C = np.array(data[1][:-1])
-    P1 = np.array([row[:-1] for row in data[2:]])
-    B = np.array([row[-1] for row in data[2:]])
+data = pd.read_csv('input3.csv', header=None)
+data = data.fillna('')
+data = data.astype(str)
 
-    return C, P1, B,z
+data = data.apply(lambda x: pd.to_numeric(x, errors='coerce')).astype(float)
+data = data.values.tolist()
 
+z = np.array(data[0][:-1])
+C = np.array(data[1][:-1])
+P1 = np.array([row[:-1] for row in data[2:]])
+B = np.array([row[-1] for row in data[2:]])
 
+P1, P2, P3 = P1, B, C
 
-def main():
-    # Take input with tab spaces
-    file_path = "assignment-3\input3.csv"  
-    C, P1, B, z = read_csv(file_path)
-    print("C: ", C)
-    print("P1: ", P1)
-    print("B: ", B)
-    print("z: ", z)
+P1, P2, P3 = make_non_degenerate(P1, P2, P3)
 
-    P1,P2,P3 = P1,B,C
-   
-    P1, P2, P3 = make_non_degenerate(P1, P2, P3)
+visited_vertices = []
+cost_values = []
 
-    print('Initial Feasible Point: ', z)
-    print('Initial Objective Value : ', np.dot(P3, z))
-    print("\n")
-    # Find the initial feasible point
-    X = get_feasible_point(P1, P2, P3)
+X = get_feasible_point(P1, P2, P3)
 
-    # Run Simplex Algorithm and find optimal solution
-    X = SimplexAlgorithm(P1, P2, P3, X)
-    print('Solution is :', X)
-    print('The Maximum Value : ', np.dot(P3, X))
+X = SimplexAlgorithm(P1, P2, P3, X, visited_vertices, cost_values)
 
+optimal_solution = np.round(X, 1)
+optimal_solution_str = "[" + " , ".join(map(str, optimal_solution)) + "]"
+print('Optimal Solution is ', optimal_solution_str)
+print('The Maximum Objective Value is ', round(np.dot(P3, X), 1))
+print('\nSequence of Visited Vertices:')
+for i, (vertex, cost) in enumerate(zip(visited_vertices, cost_values)):
+            vertex_str = "[" + " , ".join(map(str, np.round(vertex, 1))) + "]"
+            print(f"Vertex{i + 1}: Vertex: {vertex_str} , Objective Value: {round(cost, 1)}")
 
-if __name__ == "__main__":
-    main()
