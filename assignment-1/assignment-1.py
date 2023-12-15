@@ -24,16 +24,19 @@ class Simpex_Algorithm:
         self.n = size[1]
 
         self.visited_vertices = []
+        self.cost_values = []  
 
         result = self.main_simplex()
-        print(f"Optimal solution : {result}")
-        print(f"The Maximum Objective Value : {np.dot(self.y, result)}")
+        optimal_solution = np.round(result, 1)
+        optimal_solution_str = "[" + " , ".join(map(str, optimal_solution)) + "]"
+        print(f"\nOptimal solution is {optimal_solution_str}")
+        print(f"The Maximum Objective Value is {round(np.dot(self.y, result), 1)}")
 
-
-        print("\nThe Sequence of Visited Vertices :")
-        for vertex in self.visited_vertices:
-            print(f"Vertex: {vertex}, Objective Value: {np.dot(self.y, vertex)}")
-
+        print("\nSequence of Visited Vertices:")
+        for i, (vertex, cost) in enumerate(zip(self.visited_vertices, self.cost_values)):
+            vertex_str = "[" + " , ".join(map(str, np.round(vertex, 1))) + "]"
+            print(f"Vertex{i + 1}: Vertex: {vertex_str} , Objective Value: {round(cost, 1)}")
+        
     def calculate_direction(self):
         x = np.dot(self.w, self.z) - self.x
         e_indices = np.where(np.abs(x) < threshold_val_Th)[0]
@@ -45,6 +48,11 @@ class Simpex_Algorithm:
         d = np.dot(self.n_A, self.u)
         n = n[np.where(d > 0)[0]]
         d = d[np.where(d > 0)[0]]
+       
+        if len(n) == 0 or len(d) == 0:
+            print("Error: Empty array")
+            exit()
+
         s = n / d
         self.alpha = np.min(s[s >= 0])
 
@@ -70,28 +78,28 @@ class Simpex_Algorithm:
 
     def main_simplex(self):
         if np.all(np.dot(self.w, self.z) - self.x <= threshold_val_Th):
-            self.visited_vertices.append(self.z.copy())
-            
+            self.visited_vertices.append(np.round(self.z.copy(), 1))
+            self.cost_values.append(round(np.dot(self.y, self.z), 1))  
+
         while True:
             result = self.find_feasible_neighbour()
             if result is None:
                 break
             else:
                 self.z = result
-                self.visited_vertices.append(result)
+                self.visited_vertices.append(np.round(self.z.copy(), 1))
+                self.cost_values.append(round(np.dot(self.y, self.z), 1))                 
         return self.z
 
 
-data=pd.read_csv("assignment-1\input1.csv",header=None)
+data=pd.read_csv("input1.csv",header=None)
 data=data.fillna('')
 data = data.astype(str)
 data= data.values.tolist()
-print(data)
-print("\n")
-    # Extract data from CSV
+
 z = np.array([float(value) for value in data[0][:-1]])
 y = np.array([float(value) for value in data[1][:-1]])
 x = np.array([float(row[-1]) for row in data[2:]])
 w = np.array([[float(value) for value in row[:-1]] for row in data[2:]])
-    # Call the constructor and run the functions
+
 Simpex_Algorithm(w, x, y, z)
